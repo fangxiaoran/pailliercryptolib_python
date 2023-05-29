@@ -18,8 +18,10 @@
 
 import random
 
-import gmpy_math
-from fixedpoint import FixedPointNumber
+from fate import gmpy_math
+from fate.fixedpoint import FixedPointNumber
+# import gmpy_math
+# from fixedpoint import FixedPointNumber
 
 
 class PaillierKeypair(object):

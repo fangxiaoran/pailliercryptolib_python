@@ -21,6 +21,7 @@ def BM_KeyGen(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
 @benchmark.option.arg(16)
 @benchmark.option.arg(64)
 def BM_Encrypt(state):
@@ -31,6 +32,7 @@ def BM_Encrypt(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
 @benchmark.option.arg(16)
 @benchmark.option.arg(64)
 def BM_Decrypt(state):
@@ -42,6 +44,7 @@ def BM_Decrypt(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
 @benchmark.option.arg(16)
 @benchmark.option.arg(64)
 def BM_Add_CTCT(state):
@@ -55,6 +58,7 @@ def BM_Add_CTCT(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
 @benchmark.option.arg(16)
 @benchmark.option.arg(64)
 def BM_Add_CTPT(state):
@@ -68,6 +72,7 @@ def BM_Add_CTPT(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
 @benchmark.option.arg(16)
 @benchmark.option.arg(64)
 def BM_Mul_CTPT(state):
@@ -96,10 +101,10 @@ if __name__ == "__main__":
     )
     N = P * Q
 
-    context.initializeContext("QAT")
+    # context.initializeContext("QAT")
 
     pk = ipcl.PaillierPublicKey(N, N.bit_length(), True)
     sk = ipcl.PaillierPrivateKey(pk, P, Q)
 
     benchmark.main()
-    context.terminateContext()
+    # context.terminateContext()

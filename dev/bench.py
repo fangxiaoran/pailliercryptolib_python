@@ -1,6 +1,8 @@
 import google_benchmark as benchmark
 import ipcl_python as ipcl
 import numpy as np
+# from fate_paillier.fate_paillier import PaillierPublicKey, PaillierPrivateKey
+from fate import fate_paillier
 
 
 @benchmark.register
@@ -24,8 +26,7 @@ def BM_Raw_Addition(state):
 def BM_Align_Exponent(state):
     while state:
         _ = ct_x._PaillierEncryptedNumber__align_exponent(
-            ct_x.ciphertext(), ct_x.exponent(),
-            ct_y.ciphertext(), ct_y.exponent()
+            ct_x.ciphertext(), ct_x.exponent(), ct_y.ciphertext(), ct_y.exponent()
         )
 
 
@@ -35,8 +36,7 @@ def BM_Align_Exponent(state):
 def BM_Align_Exponent_Same(state):
     while state:
         _ = ct_x._PaillierEncryptedNumber__align_exponent(
-            ct_x.ciphertext(), ct_x.exponent(),
-            ct_x.ciphertext(), ct_x.exponent()
+            ct_x.ciphertext(), ct_x.exponent(), ct_x.ciphertext(), ct_x.exponent()
         )
 
 
@@ -44,11 +44,34 @@ def BM_Align_Exponent_Same(state):
 @benchmark.option.unit(benchmark.kMicrosecond)
 def BM_Pure_Addition(state):
     xx, yy, _ = ct_x._PaillierEncryptedNumber__align_exponent(
-        ct_x.ciphertext(), ct_x.exponent(),
-        ct_y.ciphertext(), ct_y.exponent()
+        ct_x.ciphertext(), ct_x.exponent(), ct_y.ciphertext(), ct_y.exponent()
     )
     while state:
         _ = xx + yy
+
+
+@benchmark.register
+@benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
+@benchmark.option.arg(16)
+def BM_Add_CTCT_IPCL(state):
+    x = (np.arange(state.range(0)) + 11) * 5111.2834
+    ct_x = pk.encrypt(x)
+
+    while state:
+        _ = ct_x + ct_x
+
+
+@benchmark.register
+@benchmark.option.unit(benchmark.kMicrosecond)
+@benchmark.option.arg(1)
+@benchmark.option.arg(16)
+def BM_Add_CTCT_FATE(state):
+    x = (np.arange(state.range(0)) + 11) * 5111.2834
+    ct_x = [pk_fate.encrypt(i) for i in x]
+
+    while state:
+        _ = [i + j for i, j in zip(ct_x, ct_x)]
 
 
 if __name__ == "__main__":
@@ -71,6 +94,9 @@ if __name__ == "__main__":
 
     pk = ipcl.PaillierPublicKey(N, N.bit_length(), True)
     sk = ipcl.PaillierPrivateKey(pk, P, Q)
+
+    pk_fate = fate_paillier.PaillierPublicKey(N)
+    sk_fate = fate_paillier.PaillierPrivateKey(pk_fate, P, Q)
 
     length = 16
     x = (np.arange(length) + 11) * 5111.2834

@@ -1,8 +1,7 @@
 import numpy as np
-from ipcl_python import PaillierKeypair
 import ipcl_python as ipcl
-import math
 import cProfile
+from fate import fate_paillier
 
 
 P = int(
@@ -27,13 +26,28 @@ sk = ipcl.PaillierPrivateKey(pk, P, Q)
 length = 16
 x = (np.arange(length) + 11) * 5111.2834
 y = (32768 - np.arange(length)) * 1.3872
-ct_x = pk.encrypt(x, precision=10**11)
-ct_y = pk.encrypt(y, precision=10**11)
+ct_x = pk.encrypt(x, precision=None)
+ct_y = pk.encrypt(y, precision=2**53)
 
 i = 0
 with cProfile.Profile() as pr:
-    while i < 1:
+    while i < 1000:
         i += 1
-        _ = ct_x + ct_y
+        _ = ct_x + ct_x
+print(f"Time slots: {ct_x.time_slot_0}, {ct_x.time_slot_1}, {ct_x.time_slot_2}")
+print(f"Total: {ct_x.time_slot_0 + ct_x.time_slot_1 + ct_x.time_slot_2}")
+pr.print_stats()
 
-# pr.print_stats()
+pkk = fate_paillier.PaillierPublicKey(N)
+skk = fate_paillier.PaillierPrivateKey(pkk, P, Q)
+
+ct_xx = [pkk.encrypt(i, precision=None) for i in x]
+ct_yy = [pkk.encrypt(i, precision=2**53) for i in y]
+
+i = 0
+with cProfile.Profile() as pr:
+    while i < 1000:
+        i += 1
+        _ = [i + j for i, j in zip(ct_xx, ct_xx)]
+
+pr.print_stats()

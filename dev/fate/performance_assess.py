@@ -47,10 +47,10 @@ class Metric(object):
                 _ = list(map(unary_op, data_x))
             final_time = time.perf_counter() - time_start
         else:
-            time_start = time.time()
+            time_start = time.perf_counter()
             for _ in range(test_round):
                 _ = list(map(binary_op, data_x, data_y))
-            final_time = time.time() - time_start
+            final_time = time.perf_counter() - time_start
 
         return final_time / test_round
 

@@ -21,4 +21,4 @@ def paillier_test(data_num, test_round, **kwargs):
 
 
 if __name__ == '__main__':
-    paillier_test(16, 10)
+    paillier_test(64, 200)

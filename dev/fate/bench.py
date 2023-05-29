@@ -7,6 +7,8 @@ import numpy as np
 from fate_paillier import PaillierKeypair
 import fate_paillier
 import google_benchmark as benchmark
+from operator import add
+import time
 
 
 @benchmark.register
@@ -20,8 +22,9 @@ def BM_KeyGen(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
-@benchmark.option.arg(16)
 @benchmark.option.arg(1)
+@benchmark.option.arg(16)
+@benchmark.option.arg(64)
 def BM_Encrypt(state):
     x = (np.arange(state.range(0)) + 11) * 1234.5678
     while state:
@@ -31,8 +34,9 @@ def BM_Encrypt(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
-@benchmark.option.arg(16)
 @benchmark.option.arg(1)
+@benchmark.option.arg(16)
+@benchmark.option.arg(64)
 def BM_Decrypt(state):
     x = (np.arange(state.range(0)) + 1) * 1234.5678
     ct_x = [pk.encrypt(i) for i in x]
@@ -43,22 +47,32 @@ def BM_Decrypt(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
-@benchmark.option.arg(16)
 @benchmark.option.arg(1)
+@benchmark.option.arg(16)
+@benchmark.option.arg(64)
 def BM_Add_CTCT(state):
     x = (np.arange(state.range(0)) + 11) * 5111.2834
     y = (32768 - np.arange(state.range(0))) * 1.3872
     ct_x = [pk.encrypt(i) for i in x]
     ct_y = [pk.encrypt(i) for i in y]
+
+    # time_start = time.perf_counter()
+    # for _ in range(100):
+    #     _ = list(map(add, ct_x, ct_y))
+    # final_time = time.perf_counter() - time_start
+    # print(f"Time: {final_time / 100}")
+
     while state:
-        for i, j in zip(ct_x, ct_y):
-            _ = i + j
+        # for i, j in zip(ct_x, ct_y):
+        #     _ = i + j
+        benchmark.option.do_not_optimize(_ = list(map(add, ct_x, ct_y)))
 
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
-@benchmark.option.arg(16)
 @benchmark.option.arg(1)
+@benchmark.option.arg(16)
+@benchmark.option.arg(64)
 def BM_Add_CTPT(state):
     x = (np.arange(state.range(0)) + 11) * 5111.2834
     y = (32768 - np.arange(state.range(0))) * 1.3872
@@ -71,8 +85,9 @@ def BM_Add_CTPT(state):
 
 @benchmark.register
 @benchmark.option.unit(benchmark.kMicrosecond)
-@benchmark.option.arg(16)
 @benchmark.option.arg(1)
+@benchmark.option.arg(16)
+@benchmark.option.arg(64)
 def BM_Mul_CTPT(state):
     x = (np.arange(state.range(0)) + 11) * 5111.2834
     y = (32768 - np.arange(state.range(0))) * 1.3872
@@ -102,5 +117,16 @@ if __name__ == "__main__":
 
     pk = fate_paillier.PaillierPublicKey(N)
     sk = fate_paillier.PaillierPrivateKey(pk, P, Q)
+
+    # x = (np.arange(16) + 11) * 5111.2834
+    # y = (32768 - np.arange(16)) * 1.3872
+    # ct_x = [pk.encrypt(i) for i in x]
+    # ct_y = [pk.encrypt(i) for i in y]
+
+    # time_start = time.perf_counter()
+    # for _ in range(100):
+    #     _ = list(map(add, ct_x, ct_y))
+    # final_time = time.perf_counter() - time_start
+    # print(f"Time: {final_time / 100}")
 
     benchmark.main()

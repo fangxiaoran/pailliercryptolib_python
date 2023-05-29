@@ -13,6 +13,7 @@ from .bindings.ipcl_bindings import (
 import numpy as np
 import gmpy2
 from typing import Union, Optional, Tuple
+import time
 
 
 class PaillierKeypair(object):
@@ -278,6 +279,10 @@ class PaillierEncryptedNumber(object):
         self.__ipclCipherText = ciphertext
         self.__length = length
 
+        self.time_slot_0 = 0
+        self.time_slot_1 = 0
+        self.time_slot_2 = 0
+
     def __repr__(self):
         return self.__ipclCipherText.__repr__()
 
@@ -536,6 +541,7 @@ class PaillierEncryptedNumber(object):
         other: Union["PaillierEncryptedNumber", int, float, np.ndarray, list],
     ) -> "PaillierEncryptedNumber":
 
+        start_time = time.time()
         # PlainText array or list
         if isinstance(other, np.ndarray) or isinstance(other, list):
             if self.__length != len(other):
@@ -559,15 +565,20 @@ class PaillierEncryptedNumber(object):
                     "PaillierEncryptedNumber.__raw_add: CipherText size"
                     " mismatch with PaillierEncryptedNumber"
                 )
+        self.time_slot_0 += time.time() - start_time
 
+        start_time = time.time()
         self_ct_aligned, other_aligned, res_expo = self.__align_exponent(
             self.ciphertext(),
             self.exponent(),
             other.ciphertext(),
             other.exponent(),
         )
+        self.time_slot_1 += time.time() - start_time
 
+        start_time = time.time()
         res_ct = self_ct_aligned + other_aligned
+        self.time_slot_2 += time.time() - start_time
         return PaillierEncryptedNumber(
             self.public_key, res_ct, res_expo, self.__length
         )
